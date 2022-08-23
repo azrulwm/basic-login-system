@@ -2,11 +2,10 @@ const mysql = require("mysql2");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
-const { appendFileSync } = require("fs");
 require("dotenv").config();
 const app = express();
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -39,7 +38,7 @@ app.post("/auth", function (request, response) {
       [username, password],
       function (error, results, fields) {
         if (error) throw error;
-        if (result.length > 0) {
+        if (results.length > 0) {
           //Authenticate the user
           request.session.loggedin = true;
           request.session.username = username;
@@ -67,4 +66,6 @@ app.get("/home", function (request, response) {
   response.end();
 });
 
-app.listen(3000);
+const listener = app.listen(process.env.PORT || 3000, () => {
+  console.log("App is listening on port " + listener.address().port);
+});
